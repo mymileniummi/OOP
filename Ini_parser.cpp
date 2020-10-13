@@ -26,57 +26,34 @@ public:
 			}
 		}
 	}
-	//шаблонный геттер
-	template <typename T>
-	T get_variable_value(string section_name_, string variable_) {
-		throw(exception("Values can be only int, double and string"));
-	}
-
-	//явная специализация шаблона
-	template<>
-	int get_variable_value<int>(string section_name_, string variable_) {
-		regex int_("([0-9]+)");
-		auto it = info[section_name_].find(variable_);
-		if (it != info[section_name_].end()) {
-			if (regex_match(info[section_name_][variable_].c_str(), int_)) {
-				return atoi(info[section_name_][variable_].c_str());
-			}
-			else {
-				throw(exception("Types does not match"));
-			}
-		}
-		else
-			throw(exception("No such section or variable"));
-	}
-	template<>
-    double get_variable_value<double>(string section_name_, string variable_) {
-		regex double_("([0-9]{1,})""(\\.)""([0-9]{1,})");
-		auto it = info[section_name_].find(variable_);
-		if (it != info[section_name_].end()) {
-			if (regex_match(info[section_name_][variable_].c_str(), double_)) {
-				return atof(info[section_name_][variable_].c_str());
-			}
-			else {
-				throw(exception("Types does not match"));
-			}
-		}
-		else
-			throw(exception("No such section or variable"));
-	}
-	template<>
-    string get_variable_value<string>(string section_name_, string variable_) {
+	string get_value_string(string section_name_, string variable_) {
 		regex string_("([\\w-./]+)");
 		auto it = info[section_name_].find(variable_);
 		if (it != info[section_name_].end()) {
-			if (regex_match(info[section_name_][variable_].c_str(), string_)) {
-				return info[section_name_][variable_];
-			}
-			else {
-				throw(exception("Types does not match"));
-			}
+			return info[section_name_][variable_];
 		}
 		else
 			throw(exception("No such section or variable"));
+	}
+	int get_value_int(string section_name_, string variable_) {
+		string value = get_value_string(section_name_, variable_);
+		regex int_("([0-9]+)");
+		if (regex_match(value.c_str(), int_)) {
+			return atoi(value.c_str());
+		}
+		else {
+			throw(exception("Types does not match"));
+		}
+	}
+	double get_value_double(string section_name_, string variable_) {
+		regex double_("([0-9]{1,})""(\\.)""([0-9]{1,})");
+		string value = get_value_string(section_name_, variable_);
+		if (regex_match(value.c_str(), double_)) {
+			return atof(value.c_str());
+		}
+		else {
+			throw(exception("Types does not match"));
+		}
 	}
 };
 void file_init(string file_name, ini_file& dictionary) {
@@ -131,7 +108,9 @@ int main() {
 	try {
 		file_init("file.ini", example_ini);
 		example_ini.show();
-		cout << example_ini.get_variable_value<string>("[COMMON]", "DiskCachePath");
+		cout << example_ini.get_value_string("[COMMON]", "DiskCachePath") << "\n" ;
+		cout << example_ini.get_value_int("[NCMD]", "EnableChannelControl") << "\n";
+		cout << example_ini.get_value_double("[NCMD]", "SampleRate");
 	} 
 	catch(exception &ex) {
 		cout << ex.what();
