@@ -128,7 +128,6 @@ void file_init(string file_name, ini_file& dictionary) {
 
 int main() {
 	ini_file example_ini;
-	file_init("file.ini", example_ini);
 	try {
 		file_init("file.ini", example_ini);
 		example_ini.show();
